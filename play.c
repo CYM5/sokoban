@@ -25,7 +25,7 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
 
     file = fopen("level/level2.txt", "r");
     SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 255, 255, 255));
-    //Debut génération
+    //BEGIN GENERAT
     if(file != NULL){
         wall = IMG_Load("sprite/mur.jpg");
         mario = IMG_Load("sprite/mario_bas.gif");
@@ -62,7 +62,7 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
             SDL_Flip(ecran);
             position.y+=BLOC_SIZE;
             position.x=0;
-        } //Fin de la boucle
+        } //END LOOP
 
 
         fclose(file);
@@ -96,7 +96,7 @@ void play(SDL_Surface* ecran){
     char map[12][12]={'0'};
     load_level(ecran, map);
     /*
-    CONVERTION DE LA MAP EN INT
+    CONVERT MAP CHAR IN INT
     */
     for(i=0;i<12;i++){
         for(j=0;j<12;j++){
@@ -123,7 +123,7 @@ void play(SDL_Surface* ecran){
 
     }
     /*
-    FIN DE LA CONVERTION
+    END
     */
 
     /*
