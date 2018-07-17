@@ -30,10 +30,10 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
         wall = IMG_Load("sprite/mur.jpg");
         mario = IMG_Load("sprite/mario_bas.gif");
         box = IMG_Load("sprite/caisse.jpg");
-        goal = IMG_Load("sprite/objectif.png"); // Je charge mes sprites
+        goal = IMG_Load("sprite/objectif.png"); // Load sprites
         for(i=0;i<=12;i++){
             if(i!=0){
-               fseek(file, 2, SEEK_CUR); //Je supprimes mes caractère de fin de chaine
+               fseek(file, 2, SEEK_CUR); //Delete end caracter of each line
             }
             fgets(level_line,MAX_level_line,file);
             for(j=0;j<12;j++){
@@ -77,19 +77,20 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
 void play(SDL_Surface* ecran){
     unsigned int playing = 1;
     int nb_goal = 0;
-    int i,j;
+    int i,j,cmpt=0,cmpt_goal;
     int case_mario_x = 0, case_mario_y = 0;
-    SDL_Rect begin_position, tmp_box, goal_position;
+    SDL_Rect begin_position, tmp_box, *goal_position = NULL, goal_position_to_screen;
     SDL_Surface *empty = NULL;
     SDL_Event event;
-    SDL_Surface *mario_up = NULL, *mario_down = NULL, *mario_left = NULL, *mario_right = NULL, *box = NULL;
+    SDL_Surface *mario_up = NULL, *mario_down = NULL, *mario_left = NULL, *mario_right = NULL, *box = NULL, *box_ok = NULL;
     mario_down = IMG_Load("sprite/mario_bas.gif");
     mario_left = IMG_Load("sprite/mario_gauche.gif");
     mario_up = IMG_Load("sprite/mario_haut.gif");
     mario_right = IMG_Load("sprite/mario_droite.gif");
     box = IMG_Load("sprite/caisse.jpg");
+    box_ok = IMG_Load("sprite/caisse_ok.jpg");
 
-    empty = SDL_CreateRGBSurface(SDL_HWSURFACE, 34, 34, 32, 0, 0, 0, 0); //Surface pour effacer l'ancien mario ou les anciennes boites
+    empty = SDL_CreateRGBSurface(SDL_HWSURFACE, 34, 34, 32, 0, 0, 0, 0); //Surface to delete the old mario
     SDL_FillRect(empty, NULL, SDL_MapRGB(ecran->format, 255, 255, 255));
     int map_int[12][12]={0};
     char map[12][12]={'0'};
@@ -126,8 +127,8 @@ void play(SDL_Surface* ecran){
     */
 
     /*
-    Recup des infos importante de la map, position initial
-    position des objectifs etc...
+    To have the begin position of mario
+    and the number of obj
     */
     for(i=0;i<12;i++){
         for(j=0;j<12;j++){
@@ -138,8 +139,6 @@ void play(SDL_Surface* ecran){
                     break;
                 case 3:
                     nb_goal++;
-                    goal_position.x=j;
-                    goal_position.y=i;
                     break;
             }
         }
@@ -149,11 +148,31 @@ void play(SDL_Surface* ecran){
     begin_position.x=begin_position.x*BLOC_SIZE;
     begin_position.y=begin_position.y*BLOC_SIZE;
 
-
     /*
-    DEBUT DU JEU
+    TO HAVE ALL POSITION OF OBJ
+    */
+    goal_position = malloc(nb_goal*sizeof(SDL_Rect));
+
+    if(goal_position==NULL){
+        exit(1);
+    }
+    for(i=0;i<12;i++){
+        for(j=0;j<12;j++){
+                if(map_int[i][j]==3){
+                    goal_position[cmpt].x=i;
+                    goal_position[cmpt].y=j;
+                    cmpt++;
+                }
+        }
+    }
+    /*
+    END
+    */
+    /*
+    BEGIN
     */
     while(playing){
+
         SDL_WaitEvent(&event);
 
         switch(event.type)
@@ -162,6 +181,7 @@ void play(SDL_Surface* ecran){
                 playing = 0;
                 break;
             case SDL_KEYDOWN:
+                cmpt_goal=0;
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE:
@@ -170,31 +190,31 @@ void play(SDL_Surface* ecran){
                     case SDLK_UP:
                         if((map_int[case_mario_x][case_mario_y-1]== 2)&&(map_int[case_mario_x][case_mario_y-2]== 0)){
                             //DO NOTHING
-                            // ICI on gère le cas ou la boite est collée au mur
+                            //WHEN A BOX IS NEAR TO A WALL
                         }
                         else if(map_int[case_mario_x][case_mario_y-1] == 2){
-                            //BOX
+                            //MOVE THE BOX FIRST
                             tmp_box.x=begin_position.x;
                             tmp_box.y=begin_position.y-(BLOC_SIZE*2);
                             SDL_BlitSurface(box, NULL, ecran, &tmp_box);
                             map_int[case_mario_x][case_mario_y-2]=2;
                             //MARIO
-                            SDL_BlitSurface(empty, NULL, ecran, &begin_position);//Je vide l'ancienne case de mario
-                            begin_position.y-=BLOC_SIZE; // Je met à jour la nouvelle position de mario
+                            SDL_BlitSurface(empty, NULL, ecran, &begin_position);//Empty old mario position
+                            begin_position.y-=BLOC_SIZE; // Update the new position
                             SDL_BlitSurface(empty, NULL, ecran, &begin_position);
-                            map_int[case_mario_x][case_mario_y]=4; // Maj de la map pour déplacer mario à l'interieur
-                            case_mario_y--; // Maj de la position de mario dans la map théorique
-                            map_int[case_mario_x][case_mario_y]=1; //Maj de la postion de mario dans la map théorique
-                            SDL_BlitSurface(mario_up, NULL, ecran, &begin_position); // Je déplace mario dans l'interface
+                            map_int[case_mario_x][case_mario_y]=4; //Update the old mario position to empty the case
+                            case_mario_y--; // Update mario pos in the teorical map
+                            map_int[case_mario_x][case_mario_y]=1; //Update the new mario position
+                            SDL_BlitSurface(mario_up, NULL, ecran, &begin_position); // Move mario
 
                         }
-                        else if(map_int[case_mario_x][case_mario_y-1]!= 0){ //Je test si on va dans un mur ou non
-                            SDL_BlitSurface(empty, NULL, ecran, &begin_position);//Je vide l'ancienne case de mario
-                            begin_position.y-=BLOC_SIZE; // Je met à jour la nouvelle position de mario
-                            map_int[case_mario_x][case_mario_y]=4; // Maj de la map pour déplacer mario à l'interieur
-                            case_mario_y--; // Maj de la position de mario dans la map théorique
-                            map_int[case_mario_x][case_mario_y]=1; //Maj de la postion de mario dans la map théorique
-                            SDL_BlitSurface(mario_up, NULL, ecran, &begin_position); // Je déplace mario dans l'interface
+                        else if(map_int[case_mario_x][case_mario_y-1]!= 0){
+                            SDL_BlitSurface(empty, NULL, ecran, &begin_position);
+                            begin_position.y-=BLOC_SIZE;
+                            map_int[case_mario_x][case_mario_y]=4;
+                            case_mario_y--;
+                            map_int[case_mario_x][case_mario_y]=1;
+                            SDL_BlitSurface(mario_up, NULL, ecran, &begin_position);
                         }
                         break;
                     case SDLK_DOWN:
@@ -287,10 +307,29 @@ void play(SDL_Surface* ecran){
                 }
             break;
         }
-        playing=is_win(map_int);
+        //Test to see is the game is win or not, we check if there is a box on any goal position
+        for(i=0;i<nb_goal;i++){
+            //printf("GOAL OBJ -> %d \n",map_int[goal_position[i].x][goal_position[i].y]);
+            if(map_int[goal_position[i].x][goal_position[i].y]==2){
+                goal_position_to_screen.x = goal_position[i].x * BLOC_SIZE;
+                goal_position_to_screen.y = goal_position[i].y * BLOC_SIZE;
+                SDL_BlitSurface(box_ok, NULL, ecran, &goal_position_to_screen);
+                cmpt_goal++;
+            }
+        }
+        if(cmpt_goal==nb_goal){
+            playing=0;
+        }
 
         SDL_Flip(ecran);
     }
+    free(goal_position);
+    SDL_FreeSurface(mario_down);
+    SDL_FreeSurface(mario_right);
+    SDL_FreeSurface(mario_up);
+    SDL_FreeSurface(mario_left);
+    SDL_FreeSurface(box);
+    SDL_FreeSurface(box_ok);
 }
 
 void print_map(int tab[12][12]){
