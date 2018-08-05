@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "SDL_image.h"
 #include "constant.h"
+#include "tools.h"
 
 
 void load_level(SDL_Surface* ecran, char map[12][12]){
@@ -23,9 +24,9 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
     int i,j=0;
     char level_line[12]="";
 
-    file = fopen("level/level2.txt", "r");
+    file = fopen("level/new_level.txt", "r");
     SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 255, 255, 255));
-    //BEGIN GENERAT
+    //Debut génération
     if(file != NULL){
         wall = IMG_Load("sprite/mur.jpg");
         mario = IMG_Load("sprite/mario_bas.gif");
@@ -62,7 +63,7 @@ void load_level(SDL_Surface* ecran, char map[12][12]){
             SDL_Flip(ecran);
             position.y+=BLOC_SIZE;
             position.x=0;
-        } //END LOOP
+        } //Fin de la boucle
 
 
         fclose(file);
@@ -96,7 +97,7 @@ void play(SDL_Surface* ecran){
     char map[12][12]={'0'};
     load_level(ecran, map);
     /*
-    CONVERT MAP CHAR IN INT
+    CONVERTION DE LA MAP EN INT
     */
     for(i=0;i<12;i++){
         for(j=0;j<12;j++){
@@ -123,7 +124,7 @@ void play(SDL_Surface* ecran){
 
     }
     /*
-    END
+    FIN DE LA CONVERTION
     */
 
     /*
@@ -332,25 +333,6 @@ void play(SDL_Surface* ecran){
     SDL_FreeSurface(box_ok);
 }
 
-void print_map(int tab[12][12]){
-    int i,j;
-    for(i=0;i<12;i++){
-        for(j=0;j<12;j++){
-            printf("%d",tab[j][i]);
-        }
-        printf("\n");
-    }
-}
-
-void print_map_c(char tab[12][12]){
-    int i,j;
-    for(i=0;i<12;i++){
-        for(j=0;j<12;j++){
-            printf("%c",tab[j][i]);
-        }
-        printf("\n");
-    }
-}
 
 int is_win(int map[12][12]){
     /*

@@ -4,6 +4,7 @@
 #include "SDL_image.h"
 #include "constant.h"
 #include "play.h"
+#include "edit.h"
 int main(int argc, char *argv[])
 {
     SDL_Surface *ecran = NULL, *menu = NULL;
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
                         play(ecran);
                         break;
                     case SDLK_KP2:
-
+                        create_level(ecran);
                         break;
                 }
             break;
