@@ -83,13 +83,14 @@ void play(SDL_Surface* ecran){
     SDL_Rect begin_position, tmp_box, *goal_position = NULL, goal_position_to_screen;
     SDL_Surface *empty = NULL;
     SDL_Event event;
-    SDL_Surface *mario_up = NULL, *mario_down = NULL, *mario_left = NULL, *mario_right = NULL, *box = NULL, *box_ok = NULL;
+    SDL_Surface *mario_up = NULL, *mario_down = NULL, *mario_left = NULL, *mario_right = NULL, *box = NULL, *box_ok = NULL, *goal=NULL;
     mario_down = IMG_Load("sprite/mario_bas.gif");
     mario_left = IMG_Load("sprite/mario_gauche.gif");
     mario_up = IMG_Load("sprite/mario_haut.gif");
     mario_right = IMG_Load("sprite/mario_droite.gif");
     box = IMG_Load("sprite/caisse.jpg");
     box_ok = IMG_Load("sprite/caisse_ok.jpg");
+    goal = IMG_Load("sprite/objectif.png");
 
     empty = SDL_CreateRGBSurface(SDL_HWSURFACE, 34, 34, 32, 0, 0, 0, 0); //Surface to delete the old mario
     SDL_FillRect(empty, NULL, SDL_MapRGB(ecran->format, 255, 255, 255));
@@ -316,6 +317,12 @@ void play(SDL_Surface* ecran){
                 goal_position_to_screen.y = goal_position[i].y * BLOC_SIZE;
                 SDL_BlitSurface(box_ok, NULL, ecran, &goal_position_to_screen);
                 cmpt_goal++;
+            }
+            if((map_int[goal_position[i].x][goal_position[i].y]!=2) && (map_int[goal_position[i].x][goal_position[i].y]!=3)){
+                goal_position_to_screen.x = goal_position[i].x * BLOC_SIZE;
+                goal_position_to_screen.y = goal_position[i].y * BLOC_SIZE;
+                SDL_BlitSurface(goal, NULL, ecran, &goal_position_to_screen);
+
             }
         }
         if(cmpt_goal==nb_goal){
